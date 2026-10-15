@@ -7,6 +7,13 @@ const globalForPrisma = globalThis as unknown as {
 function getPrismaClient(): PrismaClient {
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url:
+            process.env.DATABASE_URL ||
+            "postgresql://postgres:postgres@localhost:5432/placeholder?schema=public",
+        },
+      },
       log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
     });
   }
