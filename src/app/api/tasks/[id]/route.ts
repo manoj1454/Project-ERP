@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { updateTaskStatus } from "@/app/actions/projects";
 import { TaskStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }

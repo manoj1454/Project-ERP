@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getClients, createClient } from "@/app/actions/crm";
 import { ClientStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status") as ClientStatus | null;
