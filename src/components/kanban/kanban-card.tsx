@@ -14,6 +14,7 @@ import {
   GripVertical,
   User,
 } from "lucide-react";
+import { CuriousCard } from "@/components/visual/curious-card";
 
 interface KanbanCardProps {
   task: KanbanTask;
@@ -71,9 +72,11 @@ export function KanbanCard({ task, isOverlay = false }: KanbanCardProps) {
   const totalSubtasks = task.subTasks.length;
 
   return (
-    <div
+    <CuriousCard
       ref={setNodeRef}
       style={style}
+      glowSize={190}
+      glowOpacity={0.16}
       className={`rounded-xl p-4 transition-all duration-200 select-none group relative bg-white ${
         isOverlay
           ? "border-2 border-indigo-600 shadow-xl ring-4 ring-indigo-500/10 scale-105 cursor-grabbing"
@@ -172,6 +175,6 @@ export function KanbanCard({ task, isOverlay = false }: KanbanCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </CuriousCard>
   );
 }

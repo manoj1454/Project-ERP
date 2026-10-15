@@ -17,6 +17,9 @@ import {
   Square,
   Sparkles,
 } from "lucide-react";
+import { OrganicProgressBar } from "@/components/visual/organic-progress-bar";
+import { CuriousCard } from "@/components/visual/curious-card";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 interface SubTaskRecord {
   id: string;
@@ -61,6 +64,7 @@ interface ProjectHierarchyViewProps {
 
 export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectHierarchyViewProps) {
   const timer = useTimerStore();
+  const { notify } = useNotificationStore();
 
   const [isPhaseModalOpen, setIsPhaseModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -76,6 +80,11 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
       if (res.phaseCompleted) {
         setPhaseSuccessAlert(
           `Phase "${phaseName}" has reached 100% completion! All tasks resolved.`
+        );
+        notify(
+          "Phase Completed! 🚀",
+          `Phase "${phaseName}" reached 100% completion! Milestone achieved.`,
+          "phase_completed"
         );
       }
       onRefresh();
@@ -213,12 +222,9 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-4 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-          <div
-            className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500"
-            style={{ width: `${overallProgress}%` }}
-          />
+        {/* Living Organic Progress Bar */}
+        <div className="mt-4">
+          <OrganicProgressBar progress={overallProgress} heightClass="h-2" />
         </div>
       </div>
 
@@ -249,6 +255,7 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
             const phaseTasks = phase.tasks;
             const phaseDoneTasks = phaseTasks.filter((t) => t.status === TaskStatus.DONE);
             const isPhaseComplete = phase.status === "COMPLETED" || (phaseTasks.length > 0 && phaseDoneTasks.length === phaseTasks.length);
+            const phaseProgress = phaseTasks.length > 0 ? Math.round((phaseDoneTasks.length / phaseTasks.length) * 100) : 0;
 
             return (
               <div
@@ -288,8 +295,17 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        {phaseDoneTasks.length} of {phaseTasks.length} tasks completed
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="text-xs text-slate-500 font-medium">
+                          {phaseDoneTasks.length} of {phaseTasks.length} tasks completed ({phaseProgress}%)
+                        </div>
+                        <div className="w-28 sm:w-36">
+                          <OrganicProgressBar
+                            progress={phaseProgress}
+                            heightClass="h-1.5"
+                            barColor={isPhaseComplete ? "from-emerald-500 to-emerald-600" : undefined}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -317,8 +333,10 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
                   ) : (
                     <div className="space-y-3">
                       {phaseTasks.map((task) => (
-                        <div
+                        <CuriousCard
                           key={task.id}
+                          glowSize={190}
+                          glowOpacity={0.14}
                           className={`p-4 rounded-xl border transition ${
                             task.status === TaskStatus.DONE
                               ? "bg-slate-50/60 border-slate-200 opacity-80"
@@ -467,7 +485,7 @@ export function ProjectHierarchyView({ project, assignees, onRefresh }: ProjectH
                               </button>
                             )}
                           </div>
-                        </div>
+                        </CuriousCard>
                       ))}
                     </div>
                   )}

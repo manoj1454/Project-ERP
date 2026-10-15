@@ -15,6 +15,8 @@ import {
   Clock,
   CheckCircle2,
 } from "lucide-react";
+import { OrganicProgressBar } from "@/components/visual/organic-progress-bar";
+import { CuriousCard } from "@/components/visual/curious-card";
 
 interface ProjectRecord {
   id: string;
@@ -188,67 +190,65 @@ export function ProjectCardList({ initialProjects, clients, onRefresh }: Project
             const progress = allTasks.length > 0 ? Math.round((doneTasks.length / allTasks.length) * 100) : 0;
 
             return (
-              <Link
+              <CuriousCard
                 key={proj.id}
-                href={`/projects/${proj.id}`}
-                className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col justify-between group"
+                className="bg-white border border-slate-200 rounded-xl shadow-xs hover:shadow-md transition-all group"
               >
-                <div>
-                  {/* Top Bar with Client & Status Badge */}
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 truncate">
-                      <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{proj.client.name}</span>
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border shrink-0 ${
-                        proj.status === "ACTIVE"
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                          : proj.status === "COMPLETED"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : "bg-amber-50 text-amber-800 border-amber-200"
-                      }`}
-                    >
-                      {proj.status}
-                    </span>
-                  </div>
-
-                  {/* Project Name & Description */}
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1">
-                    {proj.name}
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
-                    {proj.description || "No project description provided."}
-                  </p>
-                </div>
-
-                {/* Bottom Progress & Stats */}
-                <div className="mt-5 pt-3.5 border-t border-slate-100 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-                      <Layers className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>{proj.phases.length} Phases</span>
-                    </div>
-
-                    <div className="font-mono text-slate-900 font-bold">
-                      {proj.budget ? `$${proj.budget.toLocaleString()}` : "Budget N/A"}
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
+                <Link
+                  href={`/projects/${proj.id}`}
+                  className="p-5 flex flex-col justify-between h-full"
+                >
                   <div>
-                    <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="text-slate-500">Progress</span>
-                      <span className="font-mono text-slate-800 font-bold">{progress}%</span>
+                    {/* Top Bar with Client & Status Badge */}
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 truncate">
+                        <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{proj.client.name}</span>
+                      </div>
+
+                      <span
+                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border shrink-0 ${
+                          proj.status === "ACTIVE"
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                            : proj.status === "COMPLETED"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}
+                      >
+                        {proj.status}
+                      </span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
+
+                    {/* Project Name & Description */}
+                    <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1">
+                      {proj.name}
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed font-medium">
+                      {proj.description || "No project description provided."}
+                    </p>
                   </div>
+
+                  {/* Bottom Progress & Stats */}
+                  <div className="mt-5 pt-3.5 border-t border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+                        <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>{proj.phases.length} Phases</span>
+                      </div>
+
+                      <div className="font-mono text-slate-900 font-bold">
+                        {proj.budget ? `$${proj.budget.toLocaleString()}` : "Budget N/A"}
+                      </div>
+                    </div>
+
+                    {/* Living Organic Progress Bar */}
+                    <div>
+                      <div className="flex items-center justify-between text-[11px] mb-1.5">
+                        <span className="text-slate-500 font-medium">Progress</span>
+                        <span className="font-mono text-indigo-700 font-bold">{progress}%</span>
+                      </div>
+                      <OrganicProgressBar progress={progress} heightClass="h-2" />
+                    </div>
 
                   <div className="flex items-center justify-end text-[11px] font-semibold text-indigo-600 group-hover:text-indigo-800 transition pt-0.5">
                     <span className="flex items-center gap-1">
@@ -257,7 +257,8 @@ export function ProjectCardList({ initialProjects, clients, onRefresh }: Project
                   </div>
                 </div>
               </Link>
-            );
+            </CuriousCard>
+          );
           })
         )}
       </div>

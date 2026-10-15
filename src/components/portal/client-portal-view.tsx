@@ -20,6 +20,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { simulateClientPayment } from "@/app/actions/portal";
+import { OrganicProgressBar } from "@/components/visual/organic-progress-bar";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 interface TaskItem {
   id: string;
@@ -132,6 +134,8 @@ export function ClientPortalView({ client, userRole }: ClientPortalViewProps) {
   }, 0);
   const totalOutstanding = Math.max(0, totalInvoiced - totalPaid);
 
+  const { notify } = useNotificationStore();
+
   const handlePayNow = async (invoiceId: string) => {
     setPayingInvoiceId(invoiceId);
     setErrorMsg(null);
@@ -141,6 +145,11 @@ export function ClientPortalView({ client, userRole }: ClientPortalViewProps) {
 
     if (res.success) {
       setPaymentSuccessId(invoiceId);
+      notify(
+        "Payment Settled! 💳",
+        "Payment simulation recorded successfully. Project balance reconciled.",
+        "payment"
+      );
       setTimeout(() => {
         window.location.reload();
       }, 1200);
@@ -247,12 +256,11 @@ export function ClientPortalView({ client, userRole }: ClientPortalViewProps) {
                 </span>
               </div>
 
-              <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/10">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-700 rounded-full"
-                  style={{ width: `${projectProgressPercent}%` }}
-                />
-              </div>
+              <OrganicProgressBar
+                progress={projectProgressPercent}
+                heightClass="h-2.5"
+                barColor="from-emerald-400 via-teal-400 to-indigo-400"
+              />
 
               <div className="flex justify-between text-[11px] text-slate-400 font-mono pt-1">
                 <span>{completedTasks.length} / {allTasks.length} tasks done</span>
@@ -409,10 +417,11 @@ export function ClientPortalView({ client, userRole }: ClientPortalViewProps) {
 
                           <div className="flex items-center gap-3">
                             <div className="hidden sm:flex items-center gap-2">
-                              <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                                <div
-                                  className="h-full bg-emerald-500 rounded-full"
-                                  style={{ width: `${phasePercent}%` }}
+                              <div className="w-24">
+                                <OrganicProgressBar
+                                  progress={phasePercent}
+                                  heightClass="h-2"
+                                  barColor="from-emerald-500 to-teal-500"
                                 />
                               </div>
                               <span className="text-xs font-mono font-bold text-slate-700">

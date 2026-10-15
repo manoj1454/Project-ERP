@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { PageTransition } from "@/components/providers/page-transition";
+import { SentientNotification } from "@/components/visual/sentient-notification";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <AuthProvider>
           <QueryProvider>
             <PageTransition>{children}</PageTransition>
+            <SentientNotification />
           </QueryProvider>
         </AuthProvider>
       </body>

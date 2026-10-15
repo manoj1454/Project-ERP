@@ -27,6 +27,7 @@ import {
   RefreshCw,
   Loader2,
 } from "lucide-react";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 interface KanbanBoardProps {
   initialProjects: { id: string; name: string }[];
@@ -34,6 +35,7 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ initialProjects }: KanbanBoardProps) {
   const queryClient = useQueryClient();
+  const { notify } = useNotificationStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
@@ -100,6 +102,15 @@ export function KanbanBoard({ initialProjects }: KanbanBoardProps) {
 
       setOptimisticAlert(`Task updated to ${newStatus} (Optimistic UI)`);
       setTimeout(() => setOptimisticAlert(null), 3000);
+
+      if (newStatus === TaskStatus.DONE) {
+        const movedTask = previousTasks?.find((t) => t.id === taskId);
+        notify(
+          "Task Resolved! ✨",
+          `"${movedTask?.name || "Task"}" moved to DONE. Phase velocity updated.`,
+          "task_done"
+        );
+      }
 
       // Return context for rollback
       return { previousTasks };
