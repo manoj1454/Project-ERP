@@ -17,6 +17,8 @@ import {
 import { useTimerStore } from "@/store/useTimerStore";
 import { TopNavbar } from "@/components/navigation/top-navbar";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const timer = useTimerStore();
