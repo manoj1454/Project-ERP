@@ -1,0 +1,311 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// MODULE A: USER & ACCESS (RBAC)
+// ==========================================
+
+enum Role {
+  SUPERADMIN
+  EMPLOYEE
+  CLIENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(EMPLOYEE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile               Profile?
+  interactionLogs       InteractionLog[]
+  assignedTasks         Task[]
+  uploadedAssetVersions AssetVersion[]
+  timeEntries           TimeEntry[]
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatarUrl   String?
+  phoneNumber String?
+  jobTitle    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+// ==========================================
+// MODULE B: CLIENT CRM
+// ==========================================
+
+enum ClientStatus {
+  LEAD
+  ACTIVE
+  ARCHIVED
+}
+
+enum InteractionType {
+  CALL
+  EMAIL
+  MEETING
+}
+
+model Client {
+  id          String       @id @default(uuid())
+  name        String
+  companyName String?
+  email       String
+  phone       String?
+  address     String?
+  status      ClientStatus @default(LEAD)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  interactionLogs InteractionLog[]
+  projects        Project[]
+
+  @@map("clients")
+}
+
+model InteractionLog {
+  id        String          @id @default(uuid())
+  clientId  String
+  client    Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      InteractionType
+  notes     String
+  timestamp DateTime        @default(now())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("interaction_logs")
+}
+
+// ==========================================
+// MODULE C: PROJECT ENGINE
+// ==========================================
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  MED
+  HIGH
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float?
+  status      ProjectStatus @default(PLANNING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  phases   ProjectPhase[]
+  assets   Asset[]
+  invoices Invoice[]
+
+  @@map("projects")
+}
+
+model ProjectPhase {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  orderIndex Int      @default(0)
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tasks Task[]
+
+  @@map("project_phases")
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  phaseId     String
+  phase       ProjectPhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?        @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  name        String
+  description String?
+  priority    TaskPriority @default(MED)
+  status      TaskStatus   @default(TODO)
+  deadline    DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  subTasks    SubTask[]
+  assets      Asset[]
+  timeEntries TimeEntry[]
+
+  @@map("tasks")
+}
+
+model SubTask {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  name        String
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("sub_tasks")
+}
+
+// ==========================================
+// MODULE D: ASSET MANAGER
+// ==========================================
+
+enum AssetCategory {
+  BLUEPRINT
+  CONTRACT
+  RENDER
+}
+
+model Asset {
+  id               String        @id @default(uuid())
+  projectId        String
+  project          Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId           String?
+  task             Task?         @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  name             String
+  category         AssetCategory
+  currentVersionId String?       @unique
+  currentVersion   AssetVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  versions AssetVersion[] @relation("AssetVersions")
+
+  @@map("assets")
+}
+
+model AssetVersion {
+  id            String   @id @default(uuid())
+  assetId       String
+  asset         Asset    @relation("AssetVersions", fields: [assetId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  fileUrl       String
+  uploadedBy    String
+  uploader      User     @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+  changeLog     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  currentForAsset Asset? @relation("CurrentVersion")
+
+  @@map("asset_versions")
+}
+
+// ==========================================
+// MODULE E: TIME-TRACKING
+// ==========================================
+
+model TimeEntry {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId          String
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  startTime       DateTime
+  endTime         DateTime?
+  durationMinutes Int?
+  isBillable      Boolean   @default(true)
+  notes           String?
+  isBilled        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("time_entries")
+}
+
+// ==========================================
+// MODULE F: FINANCIALS
+// ==========================================
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  projectId     String
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invoiceNumber String        @unique
+  issueDate     DateTime
+  dueDate       DateTime
+  totalAmount   Float
+  status        InvoiceStatus @default(DRAFT)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float
+  unitPrice   Float
+  total       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount      Float
+  paymentDate DateTime @default(now())
+  method      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("payments")
+}
