@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, Boxes, Loader2 } from "lucide-react";
 import { LivingEntity } from "@/components/visual/living-entity";
 
+export const dynamic = "force-dynamic";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();

@@ -6,6 +6,8 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { ShieldAlert, ArrowLeft, LogOut, Lock } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 function UnauthorizedContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();

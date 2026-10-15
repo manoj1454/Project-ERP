@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, User, Shield, ArrowRight, AlertCircle, CheckCircle2, Boxes } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default function RegisterPage() {
   const router = useRouter();
 
