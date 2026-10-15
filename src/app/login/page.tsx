@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, Boxes } from "lucide-react";
+import { LivingEntity } from "@/components/visual/living-entity";
 
 function LoginForm() {
   const router = useRouter();
@@ -61,8 +62,8 @@ function LoginForm() {
         </div>
       </div>
 
-      {/* Card */}
-      <div className="enterprise-card bg-white rounded-2xl p-8 border border-slate-200 shadow-xl">
+      {/* Frosted Glass Login Card refracting the Living Entity */}
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 border border-white/80 shadow-2xl shadow-indigo-950/10">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sign In</h1>
           <p className="text-sm text-slate-500 mt-1 font-medium">Authenticate to access role-gated operations</p>
@@ -174,7 +175,10 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      <Suspense fallback={<div className="text-slate-500 text-xs font-mono">Loading authentication...</div>}>
+      {/* Living Animated Entity trapped behind the login card */}
+      <LivingEntity />
+
+      <Suspense fallback={<div className="text-slate-500 text-xs font-mono relative z-10">Loading authentication...</div>}>
         <LoginForm />
       </Suspense>
     </div>
